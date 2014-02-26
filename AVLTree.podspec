@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "AVLTree"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "Objective-C implementation of an avl tree."
   s.homepage     = "https://github.com/StephanPartzsch/AVLTree"
   s.license      = 'MIT'

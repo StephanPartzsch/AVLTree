@@ -13,11 +13,10 @@ SPEC_BEGIN(AVLNodeSpec)
 			node = nil;
 		});
 
-		context(@"checking comparator usage", ^
+		context(@"building up the avl tree", ^
 		{
 			__block AVLNode *node1;
-
-			it(@"should not invoke comparator when adding value to  empty node", ^
+			it(@"should initialize avl tree", ^
 			{
 				node1 = [[AVLNode alloc] initWithValue:@"a" andIndex:1];
 				[[node1.value should] equal:@"a"];
@@ -27,8 +26,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node2;
-
-			it(@"should invoke compare when adding value b", ^
+			it(@"should add a second node to the tree at the right side", ^
 			{
 				// when
 				node2 = [node1 newWithValue:@"b" andIndex:2];
@@ -41,8 +39,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node3;
-
-			it(@"should invoke compare when adding value c and balance", ^
+			it(@"should add a third node to the tree and make a left rotation", ^
 			{
 				// when
 				node3 = [node2 newWithValue:@"c" andIndex:3];
@@ -55,8 +52,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node4;
-
-			it(@"should invoke compare when adding value d", ^
+			it(@"should add a fourth node to the tree (without rotation)", ^
 			{
 				// when
 				node4 = [node3 newWithValue:@"d" andIndex:4];
@@ -70,8 +66,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node5;
-
-			it(@"should invoke compare when adding value e and balance", ^
+			it(@"should add a fifth node to the tree (with a left rotation of the right subtree)", ^
 			{
 				// when
 				node5 = [node4 newWithValue:@"e" andIndex:5];
@@ -85,9 +80,9 @@ SPEC_BEGIN(AVLNodeSpec)
 				[[node5.allObjects should] equal:@[@"a", @"b", @"c", @"d", @"e"]];
 			});
 
-			__block AVLNode *node6;
 
-			it(@"should invoke compare when adding value f and balance", ^
+			__block AVLNode *node6;
+			it(@"should add a sixth node to the tree (and rotate to fix the Right Right Case)", ^
 			{
 				// when
 				node6 = [node5 newWithValue:@"f" andIndex:6];
@@ -104,8 +99,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node7;
-
-			it(@"should invoke compare when removing value b and balance", ^
+			it(@"should remove the a second node from the full tree", ^
 			{
 				// when
 				node7 = [node6 newWithoutValueOnIndex:2];
@@ -122,8 +116,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node8;
-
-			it(@"should invoke compare when removing value d and balance", ^
+			it(@"should remove the a fourth node from the full tree", ^
 			{
 				// when
 				node8 = [node6 newWithoutValueOnIndex:4];
@@ -138,8 +131,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node9;
-
-			it(@"should invoke compare when removing value d and balance", ^
+			it(@"should remove the a third node from the tree", ^
 			{
 				// when
 				node9 = [node8 newWithoutValueOnIndex:3];
@@ -153,8 +145,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node10;
-
-			it(@"should invoke compare when removing value d and balance", ^
+			it(@"should remove the a first node from the tree (and rotate left to fix the balance)", ^
 			{
 				// when
 				node10 = [node9 newWithoutValueOnIndex:1];
@@ -167,8 +158,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 
 			__block AVLNode *node11;
-
-			it(@"should invoke compare when removing value d and balance", ^
+			it(@"should remove the a sixth node from the tree", ^
 			{
 				// when
 				node11 = [node10 newWithoutValueOnIndex:6];
@@ -179,6 +169,7 @@ SPEC_BEGIN(AVLNodeSpec)
 				[node11.right.value shouldBeNil];
 				[[node11.allObjects should] equal:@[@"b", @"e"]];
 			});
+
 
 			it(@"should make a left rotation and add another elelemnt to it", ^
 			{
@@ -209,7 +200,7 @@ SPEC_BEGIN(AVLNodeSpec)
 				[[rootNode.allObjects should] equal:@[@"a", @"b", @"c"]];
 			});
 
-			it(@"should make a right rotation 2", ^
+			it(@"should make a right rotation (second expample)", ^
 			{
 				// when
 				AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"d" andIndex:4];
@@ -287,6 +278,129 @@ SPEC_BEGIN(AVLNodeSpec)
 			});
 		});
 
+
+
+		context(@"re-balance tree by rotation to fix cases", ^
+		{
+			it(@"should fix a Left Left Case", ^
+			{
+				// given
+				AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"e" andIndex:5];
+				rootNode = [rootNode newWithValue:@"f" andIndex:6];
+				rootNode = [rootNode newWithValue:@"c" andIndex:3];
+				rootNode = [rootNode newWithValue:@"d" andIndex:4];
+				rootNode = [rootNode newWithValue:@"b" andIndex:2];
+
+				[[rootNode.value should] equal:@"e"];
+				[[rootNode.left.value should] equal:@"c"];
+				[[rootNode.left.left.value should] equal:@"b"];
+				[[rootNode.left.right.value should] equal:@"d"];
+				[[rootNode.right.value should] equal:@"f"];
+
+				// when
+				rootNode = [rootNode newWithValue:@"a" andIndex:1];
+
+				// then
+				[[rootNode.value should] equal:@"c"];
+				[[rootNode.left.value should] equal:@"b"];
+				[[rootNode.left.left.value should] equal:@"a"];
+				[[rootNode.right.value should] equal:@"e"];
+				[[rootNode.right.left.value should] equal:@"d"];
+				[[rootNode.right.right.value should] equal:@"f"];
+
+				[[rootNode.allObjects should] equal:@[@"a", @"b", @"c", @"d", @"e", @"f"]];
+			});
+
+			it(@"should fix a Left Right Case", ^
+			{
+				// given
+				AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"f" andIndex:6];
+				rootNode = [rootNode newWithValue:@"b" andIndex:2];
+				rootNode = [rootNode newWithValue:@"g" andIndex:7];
+				rootNode = [rootNode newWithValue:@"a" andIndex:1];
+				rootNode = [rootNode newWithValue:@"d" andIndex:4];
+
+				[[rootNode.value should] equal:@"f"];
+				[[rootNode.left.value should] equal:@"b"];
+				[[rootNode.left.left.value should] equal:@"a"];
+				[[rootNode.left.right.value should] equal:@"d"];
+				[[rootNode.right.value should] equal:@"g"];
+
+				// when
+				rootNode = [rootNode newWithValue:@"e" andIndex:5];
+
+				// then
+				[[rootNode.value should] equal:@"d"];
+				[[rootNode.left.value should] equal:@"b"];
+				[[rootNode.left.left.value should] equal:@"a"];
+				[[rootNode.right.value should] equal:@"f"];
+				[[rootNode.right.left.value should] equal:@"e"];
+				[[rootNode.right.right.value should] equal:@"g"];
+
+				[[rootNode.allObjects should] equal:@[@"a", @"b", @"d", @"e", @"f", @"g"]];
+			});
+
+			it(@"should fix a Right Right Case", ^
+			{
+				// given
+				AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"b" andIndex:2];
+				rootNode = [rootNode newWithValue:@"a" andIndex:1];
+				rootNode = [rootNode newWithValue:@"d" andIndex:4];
+				rootNode = [rootNode newWithValue:@"c" andIndex:3];
+				rootNode = [rootNode newWithValue:@"f" andIndex:6];
+
+				[[rootNode.value should] equal:@"b"];
+				[[rootNode.left.value should] equal:@"a"];
+				[[rootNode.right.value should] equal:@"d"];
+				[[rootNode.right.left.value should] equal:@"c"];
+				[[rootNode.right.right.value should] equal:@"f"];
+
+				// when
+				rootNode = [rootNode newWithValue:@"e" andIndex:5];
+
+				// then
+				[[rootNode.value should] equal:@"d"];
+				[[rootNode.left.value should] equal:@"b"];
+				[[rootNode.left.left.value should] equal:@"a"];
+				[[rootNode.left.right.value should] equal:@"c"];
+				[[rootNode.right.value should] equal:@"f"];
+				[[rootNode.right.left.value should] equal:@"e"];
+
+				[[rootNode.allObjects should] equal:@[@"a", @"b", @"c", @"d", @"e", @"f"]];
+			});
+
+			it(@"should fix a Right Left Case", ^
+			{
+				// given
+				AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"b" andIndex:2];
+				rootNode = [rootNode newWithValue:@"a" andIndex:1];
+				rootNode = [rootNode newWithValue:@"f" andIndex:6];
+				rootNode = [rootNode newWithValue:@"d" andIndex:4];
+				rootNode = [rootNode newWithValue:@"g" andIndex:7];
+
+				[[rootNode.value should] equal:@"b"];
+				[[rootNode.left.value should] equal:@"a"];
+				[[rootNode.right.value should] equal:@"f"];
+				[[rootNode.right.left.value should] equal:@"d"];
+				[[rootNode.right.right.value should] equal:@"g"];
+
+				// when
+				rootNode = [rootNode newWithValue:@"e" andIndex:5];
+
+				// then
+				[[rootNode.value should] equal:@"d"];
+				[[rootNode.left.value should] equal:@"b"];
+				[[rootNode.left.left.value should] equal:@"a"];
+				[[rootNode.right.value should] equal:@"f"];
+				[[rootNode.right.left.value should] equal:@"e"];
+				[[rootNode.right.right.value should] equal:@"g"];
+
+				[[rootNode.allObjects should] equal:@[@"a", @"b", @"d", @"e", @"f", @"g"]];
+			});
+		});
+
+
+
 		it(@"should create an expected tree", ^
 		{
 			// when
@@ -304,8 +418,7 @@ SPEC_BEGIN(AVLNodeSpec)
 		it(@"should return a sorted array of entered elements", ^
 		{
 			// given
-			node = [[[[AVLNode alloc] initWithValue:@"a" andIndex:1] newWithValue:@"b" andIndex:2]
-								 newWithValue:@"c" andIndex:3];
+			node = [[[[AVLNode alloc] initWithValue:@"a" andIndex:1] newWithValue:@"b" andIndex:2] newWithValue:@"c" andIndex:3];
 
 			// when
 			NSArray *result = node.allObjects;
@@ -329,7 +442,6 @@ SPEC_BEGIN(AVLNodeSpec)
 
 		it(@"should not remove not contained value", ^
 		{
-
 			// given
 			AVLNode *avlNode1 = [[AVLNode alloc] initWithValue:@"a" andIndex:1];
 			AVLNode *avlNode2 = [avlNode1 newWithValue:@"b" andIndex:2];
@@ -358,6 +470,7 @@ SPEC_BEGIN(AVLNodeSpec)
 			AVLNode *rootNode = [[AVLNode alloc] initWithValue:@"0" andIndex:0];
 			NSMutableArray *indicesToRemove = [NSMutableArray new];
 			[indicesToRemove addObject:@"0"];
+
 			for (int i = 1; i < 2000; i++)
 			{
 				rootNode = [rootNode newWithValue:[NSString stringWithFormat:@"%i", i] andIndex:(unsigned long)i];
@@ -373,7 +486,6 @@ SPEC_BEGIN(AVLNodeSpec)
 			}
 
 			[[rootNode.allObjects should] equal:indicesToRemove];
-			NSLog(@"%i ------------ %ul", rootNode.allObjects.count, indicesToRemove.count);
 		});
 
 	});
